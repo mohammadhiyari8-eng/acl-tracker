@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Knee-Safe Training Calendar</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --soft:#1f2937;
+      --soft2:#334155;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#22c55e;
+      --accent2:#38bdf8;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --card:#0b1220;
+      --border:#243244;
+      --shadow:0 10px 30px rgba(0,0,0,.28);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1220 0%,#0f172a 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{padding:16px 14px 40px}
+    .app{max-width:860px;margin:0 auto}
+    .hero{
+      background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(56,189,248,.12));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:24px;
+      padding:18px;
+      margin-bottom:16px;
+    }
+    h1{margin:0 0 8px;font-size:clamp(28px,6vw,42px);line-height:1.06}
+    h2{margin:0 0 12px;font-size:22px}
+    h3{margin:0 0 10px;font-size:17px}
+    p{margin:0 0 10px;color:var(--muted);line-height:1.45}
+    .chips,.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip,.btn{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn{cursor:pointer}
+    .btn.primary{background:var(--accent);color:#06240f;border-color:transparent;font-weight:700}
+    .btn.secondary{background:rgba(56,189,248,.16);color:#dff6ff}
+    .btn.warn{background:rgba(245,158,11,.12);color:#ffe8bd}
+    .btn.ghost{background:transparent}
+    .grid{display:grid;gap:14px}
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .stat,.panel,.day-card,.exercise-card{
+      background:rgba(17,24,39,.86);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+    }
+    .stat{padding:14px}
+    .stat .n{font-size:28px;font-weight:800}
+    .stat .l{font-size:13px;color:var(--muted)}
+    .panel{padding:16px}
+    .today-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .small{font-size:13px;color:var(--muted)}
+    .day-card{padding:14px}
+    .day-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .day-date{font-weight:800;font-size:18px}
+    .badge{
+      border-radius:999px;padding:6px 10px;font-size:12px;
+      background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)
+    }
+    .badge.lower{background:rgba(34,197,94,.13);color:#d7ffe6}
+    .badge.upper{background:rgba(56,189,248,.14);color:#dcf4ff}
+    .badge.recovery{background:rgba(245,158,11,.14);color:#ffefcf}
+    .exercise-card{overflow:hidden}
+    .exercise-top{display:grid;grid-template-columns:112px 1fr;gap:12px;padding:12px}
+    .art{
+      width:112px;height:112px;border-radius:16px;
+      background:linear-gradient(180deg,#152235,#0d1728);
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;overflow:hidden
+    }
+    .exercise-meta{display:flex;flex-direction:column;gap:6px}
+    .exercise-name{font-weight:800;font-size:18px}
+    .exercise-desc{font-size:14px;color:var(--muted);line-height:1.35}
+    .exercise-bottom{padding:0 12px 12px;display:grid;gap:8px}
+    .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .target{font-size:13px;color:#c7d2fe;background:rgba(99,102,241,.12);padding:6px 10px;border-radius:999px;border:1px solid var(--border)}
+    .tracker{display:grid;grid-template-columns:1fr 110px;gap:8px}
+    input[type="number"],input[type="text"],textarea,select{
+      width:100%;padding:12px 13px;background:#0b1220;color:var(--text);
+      border:1px solid var(--border);border-radius:12px;font-size:15px;outline:none
+    }
+    textarea{min-height:84px;resize:vertical}
+    .checkline{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .checkline.done{outline:2px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08)}
+    .checkline input[type="checkbox"]{transform:scale(1.25)}
+    .calendar-list{display:grid;gap:12px}
+    .sticky-bar{
+      position:sticky;bottom:10px;z-index:30;margin-top:16px;
+      background:rgba(11,18,32,.75);backdrop-filter:blur(10px);padding:10px;
+      border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)
+    }
+    .sticky-bar .toolbar{margin:0}
+    .progress{
+      width:100%;height:11px;background:#0b1220;border-radius:999px;border:1px solid var(--border);overflow:hidden
+    }
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+    .muted{color:var(--muted)}
+    details{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.03)}
+    summary{cursor:pointer;font-weight:700}
+    .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+    @media (max-width:700px){
+      .stats{grid-template-columns:1fr 1fr}
+      .exercise-top{grid-template-columns:1fr}
+      .art{width:100%;height:160px}
+      .tracker{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <div class="small">Mobile-friendly • saves automatically on this device</div>
+    <h1>Knee-Safe Training Calendar</h1>
+    <p>Daily calendar starting from today, with pictures, exact exercises, checkboxes, notes, and saved progress for future reference. Built around your ACL-safe home plan.</p>
+    <div class="chips">
+      <span class="chip">Chair sit-to-stand instead of step-ups</span>
+      <span class="chip">Upper body on non-lower days</span>
+      <span class="chip">Local saving built in</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="jumpToday">Go to today</button>
+      <button class="btn secondary" id="exportBtn">Export data</button>
+      <label class="btn ghost" for="importFile">Import data</label>
+      <input id="importFile" type="file" accept="application/json" hidden />
+      <button class="btn warn" id="resetBtn">Reset all data</button>
+    </div>
+  </section>
+
+  <section class="grid stats" style="margin-bottom:16px">
+    <div class="stat"><div class="n" id="daysDone">0</div><div class="l">Days completed</div></div>
+    <div class="stat"><div class="n" id="exerciseTicks">0</div><div class="l">Exercise checkmarks</div></div>
+    <div class="stat"><div class="n" id="streak">0</div><div class="l">Current streak</div></div>
+  </section>
+
+  <section class="panel" id="todayPanel" style="margin-bottom:16px">
+    <div class="today-title">
+      <div>
+        <div class="small">Today</div>
+        <h2 id="todayHeading">Loading...</h2>
+        <p id="todaySubtitle"></p>
+      </div>
+      <span class="badge" id="todayBadge">Plan</span>
+    </div>
+    <div class="progress" aria-label="Today's completion">
+      <span id="todayProgress"></span>
+    </div>
+    <p class="small" id="todayProgressText" style="margin-top:8px"></p>
+  </section>
+
+  <section class="panel" style="margin-bottom:16px">
+    <h2>How to use</h2>
+    <p>Open the card for each date, follow the exercises, tick each item when done, and add notes such as pain, reps, or how the knee felt. Everything saves automatically in your browser on this iPhone.</p>
+    <details>
+      <summary>Safety notes</summary>
+      <p style="margin-top:10px">Keep the knee aligned with the toes. Use slow, controlled movement. Stop if you feel sharp pain, instability, or anything unusual around the knee.</p>
+    </details>
+  </section>
+
+  <section class="panel">
+    <div class="today-title" style="margin-bottom:12px">
+      <div>
+        <h2 style="margin-bottom:4px">Calendar</h2>
+        <p>Starting from today. Each day has the exact training and a saved tracker.</p>
+      </div>
+      <div class="small" id="rangeLabel"></div>
+    </div>
+    <div class="calendar-list" id="calendar"></div>
+  </section>
+
+  <div class="sticky-bar">
+    <div class="toolbar">
+      <button class="btn primary" id="jumpToday2">Today</button>
+      <button class="btn" id="expandAllBtn">Expand all</button>
+      <button class="btn" id="collapseAllBtn">Collapse all</button>
+    </div>
+  </div>
+
+  <div class="footer-note">Tip: After opening this site in Safari, use Share → Add to Home Screen.</div>
+</div>
+
+<script>
+const STORAGE_KEY = 'acl_calendar_tracker_v2';
+
+function ymd(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function prettyDate(date){
+  return date.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+}
+function dayLabel(date){
+  return date.toLocaleDateString(undefined,{weekday:'long'});
+}
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {days:{}}; }
+  catch(e){ return {days:{}}; }
+}
+let state = loadState();
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateStats();
+}
+function ensureDay(key){
+  if(!state.days[key]) state.days[key] = {notes:'', pain:'', exercises:{}};
+  return state.days[key];
+}
+
+const svgs = {
+  wallSit: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Wall sit illustration">
+    <rect x="86" y="10" width="8" height="100" rx="2" fill="#334155"/>
+    <circle cx="54" cy="22" r="9" fill="#f1c27d"/>
+    <path d="M54 31 L54 58 L79 58" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M79 58 L79 85" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M54 58 L38 58 L38 85" stroke="#86efac" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M79 85 L60 85" stroke="#fca5a5" stroke-width="8" stroke-linecap="round"/>
+    <path d="M38 85 L57 85" stroke="#fca5a5" stroke-width="8" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  chairSitToStand: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Chair sit to stand illustration">
+    <rect x="70" y="55" width="25" height="8" rx="2" fill="#64748b"/>
+    <rect x="73" y="63" width="4" height="24" fill="#64748b"/>
+    <rect x="88" y="63" width="4" height="24" fill="#64748b"/>
+    <circle cx="45" cy="24" r="9" fill="#f1c27d"/>
+    <path d="M45 33 L50 55 L72 55" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M50 55 L40 78" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M72 55 L75 80" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  squat: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Squat illustration">
+    <circle cx="60" cy="20" r="9" fill="#f1c27d"/>
+    <path d="M60 29 L60 54" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 42 L40 54" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 42 L80 54" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 54 L45 75 L30 92" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M60 54 L75 75 L90 92" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  bridge: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Glute bridge illustration">
+    <circle cx="31" cy="58" r="8" fill="#f1c27d"/>
+    <path d="M39 60 L56 52 L80 60" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M80 60 L95 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M55 52 L45 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="92" x2="110" y2="92" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  lunge: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Reverse lunge illustration">
+    <circle cx="56" cy="18" r="9" fill="#f1c27d"/>
+    <path d="M56 27 L56 52" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M56 38 L38 50" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M56 38 L75 49" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M56 52 L44 73 L35 92" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M56 52 L73 67 L92 67" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  hinge: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Hip hinge illustration">
+    <circle cx="58" cy="20" r="9" fill="#f1c27d"/>
+    <path d="M58 29 L73 52" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M70 44 L45 48" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M70 44 L87 48" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M73 52 L63 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M73 52 L92 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  balance: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Single leg balance illustration">
+    <circle cx="60" cy="20" r="9" fill="#f1c27d"/>
+    <path d="M60 29 L60 57" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 39 L40 49" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 39 L80 49" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 57 L60 88" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M60 57 L82 72" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  stepDown: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Step down illustration">
+    <rect x="70" y="78" width="36" height="14" rx="2" fill="#475569"/>
+    <circle cx="48" cy="18" r="9" fill="#f1c27d"/>
+    <path d="M48 27 L52 52" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M52 40 L35 48" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M52 40 L68 48" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M52 52 L76 76" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M52 52 L39 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  pushup: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Push-up illustration">
+    <circle cx="26" cy="51" r="8" fill="#f1c27d"/>
+    <path d="M34 53 L62 46 L92 56" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M60 47 L50 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M90 56 L100 85" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="92" x2="110" y2="92" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  pike: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Pike push-up illustration">
+    <circle cx="42" cy="68" r="8" fill="#f1c27d"/>
+    <path d="M50 68 L66 46 L88 72" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M66 46 L58 88" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M88 72 L95 88" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="92" x2="110" y2="92" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  dip: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Chair dip illustration">
+    <rect x="22" y="55" width="18" height="8" rx="2" fill="#64748b"/>
+    <rect x="24" y="63" width="4" height="22" fill="#64748b"/>
+    <rect x="34" y="63" width="4" height="22" fill="#64748b"/>
+    <rect x="80" y="55" width="18" height="8" rx="2" fill="#64748b"/>
+    <rect x="82" y="63" width="4" height="22" fill="#64748b"/>
+    <rect x="92" y="63" width="4" height="22" fill="#64748b"/>
+    <circle cx="60" cy="28" r="8" fill="#f1c27d"/>
+    <path d="M60 36 L60 56" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 43 L40 55" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 43 L80 55" stroke="#7dd3fc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M60 56 L48 88" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M60 56 L72 88" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="97" x2="110" y2="97" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  taps: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Shoulder taps illustration">
+    <circle cx="30" cy="42" r="7" fill="#f1c27d"/>
+    <path d="M37 44 L64 46 L92 52" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M62 46 L55 85" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M90 52 L98 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle cx="66" cy="36" r="3" fill="#fde68a"/>
+    <line x1="10" y1="92" x2="110" y2="92" stroke="#475569" stroke-width="3"/>
+  </svg>`,
+  plank: `
+  <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Plank illustration">
+    <circle cx="26" cy="55" r="8" fill="#f1c27d"/>
+    <path d="M34 57 L62 53 L92 57" stroke="#7dd3fc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M62 53 L56 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M92 57 L98 84" stroke="#86efac" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <line x1="10" y1="92" x2="110" y2="92" stroke="#475569" stroke-width="3"/>
+  </svg>`
+};
+
+const exerciseBank = {
+  wallSit:{name:'Wall Sit', target:'Quads • Knee control', dose:'3 × 30–45 sec', art:svgs.wallSit, desc:'Back against wall, sit to a comfortable angle, keep knees aligned with toes.'},
+  chairSitToStand:{name:'Chair Sit-to-Stand', target:'Quads • Functional strength', dose:'3 × 10', art:svgs.chairSitToStand, desc:'Sit on a chair and stand up under control. Use a stable chair.'},
+  slowSquat:{name:'Slow Squat', target:'Quads • Control', dose:'3 × 10', art:svgs.squat, desc:'Go down slowly, pause briefly, then stand. Stay in a pain-free range.'},
+  gluteBridge:{name:'Glute Bridge', target:'Glutes • Hip support', dose:'3 × 15', art:svgs.bridge, desc:'Drive through heels, lift hips, squeeze glutes at the top.'},
+  singleLegBridge:{name:'Single-leg Glute Bridge', target:'Glutes • Single-leg strength', dose:'3 × 8 each', art:svgs.bridge, desc:'One foot on the floor, the other leg lifted. Keep hips level.'},
+  reverseLunge:{name:'Reverse Lunge', target:'Glutes • Hamstrings • Control', dose:'3 × 8 each', art:svgs.lunge, desc:'Small controlled step back. Keep front knee aligned.'},
+  hipHinge:{name:'Hip Hinge', target:'Hamstrings • Glutes', dose:'3 × 12', art:svgs.hinge, desc:'Push hips back with a long spine. Stand tall at the top.'},
+  singleLegStand:{name:'Single-leg Stand', target:'Balance • Knee stability', dose:'3 × 30 sec each', art:svgs.balance, desc:'Stand tall on one leg with steady hips. Light fingertip support is okay.'},
+  stepDown:{name:'Step-down', target:'Control • Knee tracking', dose:'3 × 8 each', art:svgs.stepDown, desc:'Use a very low stable surface if available. If not, do an extra set of chair sit-to-stand.'},
+  assistedSingleLegSquat:{name:'Assisted Single-leg Squat', target:'Control • Single-leg strength', dose:'3 × 6 each', art:svgs.balance, desc:'Hold a wall or chair for support. Use a small range only.'},
+  pushUps:{name:'Push-ups', target:'Chest • Triceps', dose:'3 × 8–12', art:svgs.pushup, desc:'Hands under shoulders. Use incline or knees if needed.'},
+  pikePushUps:{name:'Pike Push-ups', target:'Shoulders', dose:'3 × 6–10', art:svgs.pike, desc:'Hips high, head moves between hands.'},
+  chairDips:{name:'Chair Dips', target:'Triceps', dose:'3 × 8–12', art:svgs.dip, desc:'Use a stable chair, bend elbows under control.'},
+  shoulderTaps:{name:'Plank Shoulder Taps', target:'Core • Shoulder stability', dose:'3 × 20 taps', art:svgs.taps, desc:'In a high plank, tap one shoulder at a time without swaying.'},
+  plank:{name:'Plank', target:'Core stability', dose:'3 × 30 sec', art:svgs.plank, desc:'Straight body line, brace stomach, do not let hips sag.'},
+  walk:{name:'Walk', target:'Recovery • Blood flow', dose:'20–30 min', art:svgs.balance, desc:'Comfortable pace. This supports recovery and routine.'}
+};
+
+function getPlanForDate(date){
+  const dow = date.getDay(); // 0 Sun ... 6 Sat
+  switch(dow){
+    case 6: return {type:'Lower body', cls:'lower', title:'Quads + Control', exercises:['wallSit','chairSitToStand','slowSquat']};
+    case 0: return {type:'Upper body', cls:'upper', title:'Upper Body', exercises:['pushUps','pikePushUps','chairDips','shoulderTaps']};
+    case 1: return {type:'Lower body', cls:'lower', title:'Glutes + Hamstrings', exercises:['gluteBridge','singleLegBridge','reverseLunge','hipHinge']};
+    case 2: return {type:'Upper body', cls:'upper', title:'Upper Body', exercises:['pushUps','pikePushUps','chairDips','plank']};
+    case 3: return {type:'Lower body', cls:'lower', title:'Balance + Stability', exercises:['singleLegStand','assistedSingleLegSquat','chairSitToStand','plank']};
+    case 4: return {type:'Upper body light', cls:'upper', title:'Light Upper + Recovery', exercises:['pushUps','chairDips','plank','walk']};
+    case 5: return {type:'Lower body light', cls:'recovery', title:'Light Lower', exercises:['wallSit','gluteBridge','reverseLunge','slowSquat']};
+  }
+}
+
+function getRangeDays(count=42){
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Array.from({length:count}, (_,i)=> {
+    const d = new Date(start);
+    d.setDate(start.getDate()+i);
+    return d;
+  });
+}
+
+function createExerciseCard(dateKey, exKey){
+  const ex = exerciseBank[exKey];
+  const day = ensureDay(dateKey);
+  if(day.exercises[exKey] === undefined){
+    day.exercises[exKey] = {done:false, actual:''};
+  }
+  const exState = day.exercises[exKey];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-card';
+
+  const top = document.createElement('div');
+  top.className = 'exercise-top';
+  top.innerHTML = `
+    <div class="art">${ex.art}</div>
+    <div class="exercise-meta">
+      <div class="exercise-name">${ex.name}</div>
+      <div class="row">
+        <span class="target">${ex.target}</span>
+        <span class="target">${ex.dose}</span>
+      </div>
+      <div class="exercise-desc">${ex.desc}</div>
+    </div>
+  `;
+  wrap.appendChild(top);
+
+  const bottom = document.createElement('div');
+  bottom.className = 'exercise-bottom';
+
+  const check = document.createElement('label');
+  check.className = 'checkline' + (exState.done ? ' done' : '');
+  check.innerHTML = `
+    <span>Mark this exercise done</span>
+    <input type="checkbox" ${exState.done ? 'checked' : ''} />
+  `;
+  check.querySelector('input').addEventListener('change', (e)=>{
+    exState.done = e.target.checked;
+    check.className = 'checkline' + (exState.done ? ' done' : '');
+    saveState();
+    refreshToday();
+  });
+  bottom.appendChild(check);
+
+  const tracker = document.createElement('div');
+  tracker.className = 'tracker';
+  tracker.innerHTML = `
+    <input type="text" placeholder="Actual reps / seconds" value="${exState.actual || ''}" />
+    <button class="btn">Save</button>
+  `;
+  tracker.querySelector('button').addEventListener('click', ()=>{
+    exState.actual = tracker.querySelector('input').value.trim();
+    saveState();
+  });
+  bottom.appendChild(tracker);
+
+  wrap.appendChild(bottom);
+  return wrap;
+}
+
+function renderCalendar(){
+  const list = document.getElementById('calendar');
+  list.innerHTML = '';
+  const days = getRangeDays(42);
+  document.getElementById('rangeLabel').textContent = `${prettyDate(days[0])} → ${prettyDate(days[days.length-1])}`;
+
+  days.forEach((date, idx)=>{
+    const key = ymd(date);
+    const plan = getPlanForDate(date);
+    const dayState = ensureDay(key);
+
+    const details = document.createElement('details');
+    details.className = 'day-card';
+    details.id = `day-${key}`;
+    if(idx < 3) details.open = true;
+
+    const summary = document.createElement('summary');
+    const total = plan.exercises.length;
+    const doneCount = plan.exercises.filter(ex => dayState.exercises[ex]?.done).length;
+    summary.innerHTML = `
+      <div class="day-head">
+        <div>
+          <div class="day-date">${prettyDate(date)}</div>
+          <div class="small">${plan.title}</div>
+        </div>
+        <div class="row">
+          <span class="badge ${plan.cls}">${plan.type}</span>
+          <span class="badge">${doneCount}/${total}</span>
+        </div>
+      </div>
+    `;
+    details.appendChild(summary);
+
+    const inner = document.createElement('div');
+    inner.style.display = 'grid';
+    inner.style.gap = '10px';
+    inner.style.marginTop = '12px';
+
+    plan.exercises.forEach(exKey => inner.appendChild(createExerciseCard(key, exKey)));
+
+    const extra = document.createElement('div');
+    extra.className = 'grid';
+    extra.innerHTML = `
+      <div class="panel" style="padding:12px">
+        <h3 style="margin-bottom:8px">Day tracker</h3>
+        <div class="row" style="margin-bottom:8px">
+          <div style="flex:1;min-width:140px">
+            <div class="small" style="margin-bottom:6px">Knee pain today (0–10)</div>
+            <input type="number" min="0" max="10" step="1" value="${dayState.pain || ''}" placeholder="0 to 10" />
+          </div>
+        </div>
+        <div>
+          <div class="small" style="margin-bottom:6px">Notes</div>
+          <textarea placeholder="How did training feel today?">${dayState.notes || ''}</textarea>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary">Save day note</button>
+        </div>
+      </div>
+    `;
+    const painInput = extra.querySelector('input');
+    const notesInput = extra.querySelector('textarea');
+    extra.querySelector('button').addEventListener('click', ()=>{
+      dayState.pain = painInput.value;
+      dayState.notes = notesInput.value;
+      saveState();
+    });
+
+    inner.appendChild(extra);
+    details.appendChild(inner);
+    list.appendChild(details);
+  });
+
+  refreshToday();
+  updateStats();
+}
+function refreshToday(){
+  const today = new Date();
+  const key = ymd(today);
+  const plan = getPlanForDate(today);
+  const dayState = ensureDay(key);
+  const total = plan.exercises.length;
+  const done = plan.exercises.filter(ex => dayState.exercises[ex]?.done).length;
+  const pct = Math.round((done/total)*100);
+
+  document.getElementById('todayHeading').textContent = `${dayLabel(today)} — ${plan.title}`;
+  document.getElementById('todaySubtitle').textContent = prettyDate(today);
+  const badge = document.getElementById('todayBadge');
+  badge.textContent = plan.type;
+  badge.className = `badge ${plan.cls}`;
+  document.getElementById('todayProgress').style.width = pct + '%';
+  document.getElementById('todayProgressText').textContent = `${done}/${total} exercises marked done today`;
+}
+function updateStats(){
+  let daysDone = 0, ticks = 0;
+  const keys = Object.keys(state.days).sort();
+  keys.forEach(key=>{
+    const exs = state.days[key].exercises || {};
+    const vals = Object.values(exs);
+    const done = vals.filter(v => v && v.done).length;
+    ticks += done;
+    if(vals.length && done === vals.length) daysDone += 1;
+  });
+
+  document.getElementById('daysDone').textContent = daysDone;
+  document.getElementById('exerciseTicks').textContent = ticks;
+
+  let streak = 0;
+  const today = new Date();
+  for(let i=0;i<365;i++){
+    const d = new Date(today);
+    d.setDate(today.getDate()-i);
+    const key = ymd(d);
+    const day = state.days[key];
+    if(!day) break;
+    const vals = Object.values(day.exercises || {});
+    if(vals.length && vals.every(v => v && v.done)) streak++;
+    else break;
+  }
+  document.getElementById('streak').textContent = streak;
+}
+
+document.getElementById('jumpToday').onclick = document.getElementById('jumpToday2').onclick = ()=>{
+  const key = ymd(new Date());
+  const el = document.getElementById(`day-${key}`);
+  if(el){ el.open = true; el.scrollIntoView({behavior:'smooth', block:'start'}); }
+};
+document.getElementById('expandAllBtn').onclick = ()=> document.querySelectorAll('details.day-card').forEach(d => d.open = true);
+document.getElementById('collapseAllBtn').onclick = ()=> document.querySelectorAll('details.day-card').forEach(d => d.open = false);
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('Delete all saved training data on this device?')){
+    state = {days:{}};
+    saveState();
+    renderCalendar();
+  }
+};
+document.getElementById('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'acl-training-data.json';
+  a.click();
+};
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const incoming = JSON.parse(reader.result);
+      if(!incoming.days) throw new Error('Invalid file');
+      state = incoming;
+      saveState();
+      renderCalendar();
+      alert('Data imported.');
+    }catch(err){
+      alert('Import failed.');
+    }
+  };
+  reader.readAsText(file);
+});
+
+renderCalendar();
+</script>
+</body>
+</html>
