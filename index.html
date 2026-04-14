@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ACL Training Calendar</title>
+  <style>
+    :root{--bg:#0b1220;--panel:#121b2d;--text:#e5edf7;--muted:#97a6ba;--border:#27354a;--accent:#44c768;--accent2:#4ea8ff;--danger:#e95c5c;--warning:#f2b84b;--shadow:0 12px 30px rgba(0,0,0,.26);--radius:18px}
+    *{box-sizing:border-box} html,body{margin:0;padding:0;background:linear-gradient(180deg,#09111d,#0b1220 35%,#0d1525);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{padding:14px 12px 36px}.app{max-width:920px;margin:0 auto}.card{background:rgba(18,27,45,.92);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .hero{padding:18px;margin-bottom:14px;background:linear-gradient(135deg,rgba(68,199,104,.12),rgba(78,168,255,.12))}
+    h1{margin:0 0 8px;font-size:32px;line-height:1.05}h2{margin:0 0 10px;font-size:23px}h3{margin:0 0 8px;font-size:17px}p{margin:0;color:var(--muted);line-height:1.45}
+    .toolbar,.chips,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar{margin-top:14px}
+    .btn,.pill{border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,.03);border-radius:999px;padding:10px 14px;text-decoration:none;font-size:14px;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#07220e;border-color:transparent;font-weight:700}.btn.blue{background:rgba(78,168,255,.16);color:#dff0ff}.btn.warn{background:rgba(233,92,92,.15);color:#ffd6d6}.pill{cursor:default}
+    .btn[disabled], input[disabled], textarea[disabled]{opacity:.55;cursor:not-allowed}
+    .layout{display:grid;grid-template-columns:1.08fr .92fr;gap:14px}.section{padding:16px}.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .mini{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border)}.mini .n{font-size:28px;font-weight:800;line-height:1}.mini .l{margin-top:6px;color:var(--muted);font-size:13px}
+    .month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.month-title{font-size:22px;font-weight:800}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.dow{text-align:center;color:var(--muted);font-size:12px;padding-bottom:4px}
+    .day{min-height:68px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.03);padding:8px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;position:relative;transition:.15s transform ease,.15s border-color ease}
+    .day:hover{transform:translateY(-1px)}.day.other-month{opacity:.35}.day .num{font-weight:800;font-size:15px}.day .dot{width:10px;height:10px;border-radius:50%;align-self:flex-end;background:#5b6b82}
+    .day.complete{background:rgba(68,199,104,.15);border-color:rgba(68,199,104,.55)}.day.complete .dot{background:var(--accent)}.day.missed{background:rgba(233,92,92,.15);border-color:rgba(233,92,92,.55)}.day.missed .dot{background:var(--danger)}.day.today{outline:2px solid rgba(78,168,255,.6)}.day.future .dot{background:#64748b}.selected{box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+    .right-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.badge{padding:6px 10px;border-radius:999px;border:1px solid var(--border);font-size:12px;background:rgba(255,255,255,.03)}.badge.lower{background:rgba(68,199,104,.14);color:#dffbe6}.badge.upper{background:rgba(78,168,255,.14);color:#dff0ff}.badge.light{background:rgba(242,184,75,.14);color:#ffefcb}.badge.lock{background:rgba(233,92,92,.14);color:#ffdede}
+    .progress{width:100%;height:10px;border-radius:999px;background:#09111d;border:1px solid var(--border);overflow:hidden;margin-top:10px}.progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .exercise{margin-top:12px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.03)}.exercise-main{display:grid;grid-template-columns:118px 1fr;gap:12px;padding:12px}.exercise img{width:118px;height:118px;object-fit:cover;border-radius:14px;border:1px solid var(--border);background:#0a1220}
+    .exercise-name{font-weight:800;font-size:18px}.exercise-sub{font-size:13px;color:#cfe2ff;margin-top:5px}.exercise-desc{margin-top:6px;font-size:14px;color:var(--muted)}.exercise-bottom{padding:0 12px 12px}
+    .check{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.02);margin-bottom:8px}.check.done{background:rgba(68,199,104,.1);border-color:rgba(68,199,104,.45)}.check input{transform:scale(1.2)}
+    input[type=text],input[type=number],textarea{width:100%;background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:11px 12px;font-size:15px;outline:none} textarea{min-height:92px;resize:vertical}
+    .grid2{display:grid;grid-template-columns:1fr 120px;gap:8px}.source-link{font-size:12px;color:var(--muted);margin-top:8px}.note-box{margin-top:14px;padding:12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.03)}
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.legend-item{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}.sw{width:12px;height:12px;border-radius:999px}.foot{margin-top:12px;text-align:center;font-size:12px;color:var(--muted)}
+    .lock-msg{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(233,92,92,.35);background:rgba(233,92,92,.08);color:#ffdede;font-size:13px}
+    @media (max-width:820px){.layout{grid-template-columns:1fr}} @media (max-width:600px){.meta-grid{grid-template-columns:1fr 1fr}.exercise-main{grid-template-columns:1fr}.exercise img{width:100%;height:190px}.grid2{grid-template-columns:1fr}h1{font-size:28px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="card hero">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px">ACL-safe home training • saves automatically on this iPhone</div>
+    <h1>Training Calendar</h1>
+    <p>Pick any day from the calendar, see that day's workout, track each exercise, and keep your history saved for as long as you want.</p>
+    <div class="chips" style="margin-top:12px">
+      <span class="pill">Green = trained</span><span class="pill">Red = missed past day</span><span class="pill">Blue outline = today</span><span class="pill">Only today is editable</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="todayBtn">Go to today</button>
+      <button class="btn blue" id="exportBtn">Export data</button>
+      <label class="btn" for="importFile">Import data</label>
+      <input id="importFile" type="file" accept="application/json" hidden>
+      <button class="btn warn" id="resetBtn">Reset all</button>
+    </div>
+  </section>
+
+  <div class="meta-grid">
+    <div class="card mini"><div class="n" id="daysDone">0</div><div class="l">Days completed</div></div>
+    <div class="card mini"><div class="n" id="streak">0</div><div class="l">Current streak</div></div>
+    <div class="card mini"><div class="n" id="checksDone">0</div><div class="l">Exercise checkmarks</div></div>
+  </div>
+
+  <div class="layout">
+    <section class="card section">
+      <div class="month-head">
+        <div class="month-title" id="monthTitle"></div>
+        <div class="row"><button class="btn" id="prevMonth">‹</button><button class="btn" id="nextMonth">›</button></div>
+      </div>
+      <div class="calendar-grid" id="dowRow"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="sw" style="background:#44c768"></span> completed</span>
+        <span class="legend-item"><span class="sw" style="background:#e95c5c"></span> missed</span>
+        <span class="legend-item"><span class="sw" style="background:#64748b"></span> upcoming</span>
+      </div>
+      <div class="foot">A day becomes locked after 11:59 PM on your device. Past days are view-only.</div>
+    </section>
+
+    <section class="card section">
+      <div class="right-top">
+        <div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Selected day</div>
+          <h2 id="selectedDateLabel">Loading...</h2>
+          <p id="selectedSub">Loading...</p>
+        </div>
+        <div class="row">
+          <span class="badge" id="selectedBadge">Plan</span>
+          <span class="badge lock" id="editBadge">Locked</span>
+        </div>
+      </div>
+      <div class="progress"><span id="dayProgressBar"></span></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px" id="dayProgressText"></p>
+      <div id="lockMessage" class="lock-msg" style="display:none"></div>
+      <div id="exerciseList"></div>
+
+      <div class="note-box">
+        <h3>Day notes</h3>
+        <div class="row" style="margin:10px 0">
+          <div style="flex:1;min-width:120px">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Knee pain today (0–10)</div>
+            <input type="number" id="painInput" min="0" max="10" step="1" placeholder="0 to 10">
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Notes</div>
+        <textarea id="notesInput" placeholder="How did the workout feel today?"></textarea>
+        <div class="toolbar"><button class="btn primary" id="saveDayBtn">Save notes</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY='acl_tracker_calendar_v4_locked';
+const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const images={
+ wallSit:'https://s3assets.skimble.com/assets/36469/skimble-workout-trainer-exercise-wall-sit-3_iphone.jpg',
+ chairSitToStand:'https://s3assets.skimble.com/assets/2150403/skimble-workout-trainer-exercise-chair-squats-1_iphone.jpg',
+ slowSquat:'https://s3assets.skimble.com/assets/2150403/skimble-workout-trainer-exercise-chair-squats-1_iphone.jpg',
+ gluteBridge:'https://s3assets.skimble.com/assets/1270697/image_iphone.jpg',
+ singleLegBridge:'https://s3assets.skimble.com/assets/1115373/image_iphone.jpg',
+ reverseLunge:'https://s3assets.skimble.com/assets/32350/skimble-workout-trainer-exercise-reverse-lunges-3_iphone.jpg',
+ hipHinge:'https://s3assets.skimble.com/assets/1478987/image_iphone.jpg',
+ singleLegStand:'https://s3assets.skimble.com/assets/1478987/image_iphone.jpg',
+ assistedSingleLegSquat:'https://s3assets.skimble.com/assets/2150403/skimble-workout-trainer-exercise-chair-squats-1_iphone.jpg',
+ pushUps:'https://s3assets.skimble.com/assets/53912/skimble-workout-trainer-exercise-pushups-1_iphone.jpg',
+ pikePushUps:'https://s3assets.skimble.com/assets/2350771/image_iphone.jpg',
+ chairDips:'https://s3assets.skimble.com/assets/155338/skimble-workout-trainer-exercise-chair-tricep-dips_279a0269-1_iphone.jpg',
+ shoulderTaps:'https://s3assets.skimble.com/assets/52614/skimble-workout-trainer-exercise-full-plank-hold_iphone.jpg',
+ plank:'https://s3assets.skimble.com/assets/52614/skimble-workout-trainer-exercise-full-plank-hold_iphone.jpg',
+ walk:'https://s3assets.skimble.com/assets/1478987/image_iphone.jpg'
+};
+const exerciseBank={
+ wallSit:{name:'Wall Sit',dose:'3 × 30–45 sec',target:'Quads • Knee control',desc:'Back against wall, knees aligned with toes, hold a comfortable angle.'},
+ chairSitToStand:{name:'Chair Sit-to-Stand',dose:'3 × 10',target:'Quads • Functional strength',desc:'Sit on a stable chair, lean slightly forward, stand up under control, then sit back slowly.'},
+ slowSquat:{name:'Slow Squat',dose:'3 × 10',target:'Quads • Control',desc:'Slow down on the way down, stay in a pain-free range, then stand tall.'},
+ gluteBridge:{name:'Glute Bridge',dose:'3 × 15',target:'Glutes • Hip support',desc:'Drive through heels and squeeze glutes as hips lift.'},
+ singleLegBridge:{name:'Single-leg Glute Bridge',dose:'3 × 8 each',target:'Glutes • Single-leg strength',desc:'Keep hips level. Lift with the planted heel.'},
+ reverseLunge:{name:'Reverse Lunge',dose:'3 × 8 each',target:'Glutes • Hamstrings • Control',desc:'Small controlled step back. Keep the front knee steady.'},
+ hipHinge:{name:'Hip Hinge',dose:'3 × 12',target:'Hamstrings • Glutes',desc:'Push hips back with a straight back, then squeeze glutes to return.'},
+ singleLegStand:{name:'Single-leg Stand',dose:'3 × 30 sec each',target:'Balance • Stability',desc:'Stand tall on one leg. Light support is okay.'},
+ assistedSingleLegSquat:{name:'Assisted Single-leg Squat',dose:'3 × 6 each',target:'Single-leg control',desc:'Hold a wall or chair and use only a small, controlled range.'},
+ pushUps:{name:'Push-ups',dose:'3 × 8–12',target:'Chest • Triceps',desc:'Keep a straight line. Use incline or knees if needed.'},
+ pikePushUps:{name:'Pike Push-ups',dose:'3 × 6–10',target:'Shoulders',desc:'Hips high, head moving between the hands.'},
+ chairDips:{name:'Chair Dips',dose:'3 × 8–12',target:'Triceps',desc:'Use a sturdy chair and keep the movement controlled.'},
+ shoulderTaps:{name:'Plank Shoulder Taps',dose:'3 × 20 taps',target:'Core • Shoulder stability',desc:'Tap each shoulder from a high plank with minimal sway.'},
+ plank:{name:'Plank',dose:'3 × 30 sec',target:'Core stability',desc:'Brace the core and keep the body in a straight line.'},
+ walk:{name:'Walk',dose:'20–30 min',target:'Recovery',desc:'Comfortable pace to keep recovery and consistency moving.'}
+};
+const imageSources={
+ wallSit:'https://www.skimble.com/exercises/804-wall-sit-how-to-do-exercise',
+ chairSitToStand:'https://www.skimble.com/exercises/1074-chair-squats-how-to-do-exercise',
+ slowSquat:'https://www.skimble.com/exercises/1074-chair-squats-how-to-do-exercise',
+ gluteBridge:'https://www.skimble.com/exercises/25771-glute-bridge-how-to-do-exercise',
+ singleLegBridge:'https://www.skimble.com/exercises/21555-single-leg-glute-bridge-how-to-do-exercise',
+ reverseLunge:'https://www.skimble.com/exercises/989-reverse-lunges-how-to-do-exercise',
+ hipHinge:'https://www.skimble.com/exercises/32840-single-leg-balance-reach-how-to-do-exercise',
+ singleLegStand:'https://www.skimble.com/exercises/32840-single-leg-balance-reach-how-to-do-exercise',
+ assistedSingleLegSquat:'https://www.skimble.com/exercises/1074-chair-squats-how-to-do-exercise',
+ pushUps:'https://www.skimble.com/exercises/266-push-ups-how-to-do-exercise',
+ pikePushUps:'https://www.skimble.com/exercises/62014-pike-push-up-how-to-do-exercise',
+ chairDips:'https://www.skimble.com/exercises/1079',
+ shoulderTaps:'https://www.skimble.com/exercises/794-plank-how-to-do-exercise',
+ plank:'https://www.skimble.com/exercises/794-plank-how-to-do-exercise',
+ walk:'https://www.skimble.com/exercises/32840-single-leg-balance-reach-how-to-do-exercise'
+};
+function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function fromYmd(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function sameDate(a,b){return ymd(a)===ymd(b);}
+function fmtDate(d){return d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+function defaultState(){const t=ymd(new Date());return {version:4,appStartDate:t,selectedDate:t,days:{}}}
+function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY));return raw&&raw.days?raw:defaultState();}catch(e){return defaultState();}}
+let state=loadState();
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();renderCalendar();renderSelectedDay();}
+function ensureDay(key){if(!state.days[key]) state.days[key]={notes:'',pain:'',exercises:{}}; return state.days[key];}
+function getPlan(d){switch(d.getDay()){case 6:return {label:'Lower body',badge:'lower',title:'Quads + Control',exercises:['wallSit','chairSitToStand','slowSquat']};case 0:return {label:'Upper body',badge:'upper',title:'Upper Body',exercises:['pushUps','pikePushUps','chairDips','shoulderTaps']};case 1:return {label:'Lower body',badge:'lower',title:'Glutes + Hamstrings',exercises:['gluteBridge','singleLegBridge','reverseLunge','hipHinge']};case 2:return {label:'Upper body',badge:'upper',title:'Upper Body',exercises:['pushUps','pikePushUps','chairDips','plank']};case 3:return {label:'Lower body',badge:'lower',title:'Balance + Stability',exercises:['singleLegStand','assistedSingleLegSquat','chairSitToStand','plank']};case 4:return {label:'Upper body light',badge:'light',title:'Light Upper + Recovery',exercises:['pushUps','chairDips','plank','walk']};case 5:return {label:'Lower body light',badge:'light',title:'Light Lower',exercises:['wallSit','gluteBridge','reverseLunge','slowSquat']};}}
+function isTodayKey(key){return key===ymd(new Date());}
+function canEditKey(key){return isTodayKey(key);}
+function isDayComplete(key){const d=fromYmd(key), plan=getPlan(d), day=ensureDay(key);return plan.exercises.every(ex=>day.exercises[ex]&&day.exercises[ex].done);}
+function dayStatus(d){const key=ymd(d), today=new Date(), appStart=fromYmd(state.appStartDate), compare=new Date(d.getFullYear(),d.getMonth(),d.getDate());today.setHours(0,0,0,0);appStart.setHours(0,0,0,0); if(isDayComplete(key)) return 'complete'; if(sameDate(compare,today)) return 'today'; if(compare<today && compare>=appStart) return 'missed'; return 'future';}
+function renderStats(){let daysDone=0,checksDone=0;Object.keys(state.days).forEach(key=>{const vals=Object.values(state.days[key].exercises||{});checksDone+=vals.filter(v=>v&&v.done).length;if(vals.length&&vals.every(v=>v&&v.done)) daysDone++;});let streak=0;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<730;i++){const d=new Date(today);d.setDate(today.getDate()-i);if(isDayComplete(ymd(d))) streak++; else break;}document.getElementById('daysDone').textContent=daysDone;document.getElementById('streak').textContent=streak;document.getElementById('checksDone').textContent=checksDone;}
+let viewYear=fromYmd(state.selectedDate).getFullYear(), viewMonth=fromYmd(state.selectedDate).getMonth();
+function renderCalendar(){document.getElementById('monthTitle').textContent=new Date(viewYear,viewMonth,1).toLocaleDateString(undefined,{month:'long',year:'numeric'});document.getElementById('dowRow').innerHTML=DOW.map(d=>`<div class="dow">${d}</div>`).join('');const grid=document.getElementById('calendarGrid');grid.innerHTML='';const first=new Date(viewYear,viewMonth,1), start=new Date(first);start.setDate(1-first.getDay());const selected=fromYmd(state.selectedDate);for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const div=document.createElement('button');div.className=`day ${dayStatus(d)} ${d.getMonth()!==viewMonth?'other-month':''} ${sameDate(d,selected)?'selected':''}`;div.type='button';div.innerHTML=`<span class="num">${d.getDate()}</span><span class="dot"></span>`;div.onclick=()=>{state.selectedDate=ymd(d);viewYear=d.getFullYear();viewMonth=d.getMonth();saveState();};grid.appendChild(div);}}
+function renderSelectedDay(){const d=fromYmd(state.selectedDate), key=ymd(d), plan=getPlan(d), day=ensureDay(key), editable=canEditKey(key);document.getElementById('selectedDateLabel').textContent=fmtDate(d);document.getElementById('selectedSub').textContent=plan.title;const badge=document.getElementById('selectedBadge');badge.textContent=plan.label;badge.className=`badge ${plan.badge}`;document.getElementById('editBadge').textContent=editable?'Editable':'Locked';document.getElementById('editBadge').className=`badge ${editable?'upper':'lock'}`;
+  const lockMsg=document.getElementById('lockMessage');
+  if(editable){lockMsg.style.display='none';}
+  else{lockMsg.style.display='block';lockMsg.textContent='This day is locked. After 11:59 PM, previous days become view-only and can no longer be edited.';}
+  const done=plan.exercises.filter(ex=>day.exercises[ex]&&day.exercises[ex].done).length;document.getElementById('dayProgressBar').style.width=Math.round(done/plan.exercises.length*100)+'%';document.getElementById('dayProgressText').textContent=`${done}/${plan.exercises.length} exercises marked done`;const list=document.getElementById('exerciseList');list.innerHTML='';plan.exercises.forEach(exKey=>{const ex=exerciseBank[exKey];if(day.exercises[exKey]===undefined) day.exercises[exKey]={done:false,actual:''};const exState=day.exercises[exKey];const card=document.createElement('div');card.className='exercise';card.innerHTML=`<div class="exercise-main"><img src="${images[exKey]}" alt="${ex.name}" onerror="this.style.opacity='.2'; this.alt='Image unavailable';"><div><div class="exercise-name">${ex.name}</div><div class="exercise-sub">${ex.target} • ${ex.dose}</div><div class="exercise-desc">${ex.desc}</div><div class="source-link">Reference photo • <a href="${imageSources[exKey]}" target="_blank" rel="noopener noreferrer" style="color:#97a6ba;font-size:12px">Open source</a></div></div></div><div class="exercise-bottom"><label class="check ${exState.done?'done':''}"><span>Done</span><input type="checkbox" ${exState.done?'checked':''}></label><div class="grid2"><input type="text" placeholder="Actual reps / seconds" value="${exState.actual||''}"><button class="btn">Save</button></div></div>`;const checkbox=card.querySelector('input[type=checkbox]');checkbox.disabled=!editable;checkbox.onchange=e=>{if(!editable) return; exState.done=e.target.checked;saveState();};const actualInput=card.querySelector('input[type=text]');actualInput.disabled=!editable;const saveBtn=card.querySelector('.btn');saveBtn.disabled=!editable;saveBtn.onclick=()=>{if(!editable) return; exState.actual=actualInput.value.trim();saveState();};list.appendChild(card);});
+  const painInput=document.getElementById('painInput'), notesInput=document.getElementById('notesInput'), saveDayBtn=document.getElementById('saveDayBtn');
+  painInput.value=day.pain||''; notesInput.value=day.notes||''; painInput.disabled=!editable; notesInput.disabled=!editable; saveDayBtn.disabled=!editable;
+}
+document.getElementById('saveDayBtn').onclick=()=>{const key=state.selectedDate;if(!canEditKey(key)) return; const day=ensureDay(key);day.pain=document.getElementById('painInput').value.trim();day.notes=document.getElementById('notesInput').value;saveState();};
+document.getElementById('prevMonth').onclick=()=>{viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}renderCalendar();};
+document.getElementById('nextMonth').onclick=()=>{viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}renderCalendar();};
+document.getElementById('todayBtn').onclick=()=>{const t=new Date();state.selectedDate=ymd(t);viewYear=t.getFullYear();viewMonth=t.getMonth();saveState();};
+document.getElementById('resetBtn').onclick=()=>{if(confirm('Delete all saved data on this device?')){state=defaultState();saveState();}};
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='acl-training-calendar-data.json';a.click();};
+document.getElementById('importFile').addEventListener('change',e=>{const file=e.target.files[0];if(!file) return;const reader=new FileReader();reader.onload=()=>{try{const incoming=JSON.parse(reader.result);if(!incoming.days) throw new Error('Invalid');state=incoming;if(!state.appStartDate) state.appStartDate=ymd(new Date());if(!state.selectedDate) state.selectedDate=ymd(new Date());viewYear=fromYmd(state.selectedDate).getFullYear();viewMonth=fromYmd(state.selectedDate).getMonth();saveState();alert('Data imported.');}catch(err){alert('Import failed.');}};reader.readAsText(file);});
+renderStats();renderCalendar();renderSelectedDay();
+</script>
+</body>
+</html>
